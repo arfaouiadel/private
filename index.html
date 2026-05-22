@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pipo Adventure 🐶</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Tangerine:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            overflow-x: hidden;
+            font-family: "Inter", sans-serif;
+        }
+
+        .bg-old {
+            background-image: url(https://www.pngall.com/wp-content/uploads/15/Old-Paper-PNG-Photo.png);
+            background-size: 100% 100%;
+            border-radius: 20px;
+            padding: 2rem;
+            min-width: 35rem;
+        }
+
+        .bg-letter {
+            background-image: url(./assets/letterbg.png);
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            padding-top: 5rem;
+        }
+
+        .bg-main {
+            background-image: url('https://contentful.harrypotter.com/usf1vwtuqyxm/13TbwugHDSCMgq4gCmsKsU/ab629e73726c75d56c1eade6b1603e90/Fantastic_Beasts_app_game.png?q=75&fm=webp&w=2560');
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        .bg-btn {
+            background-image: url(https://t4.ftcdn.net/jpg/04/34/62/85/360_F_434628572_gYCk6CpgunaSyQsoRP6bGldcRNHiZnG5.jpg);
+            background-size: 100%;
+            font-weight: 700;
+        }
+
+        .letter {
+            animation: openLetter 1s ease;
+            transform-origin: center;
+        }
+
+        @keyframes openLetter {
+            0% {
+                transform: scale(0.3) rotateX(80deg);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1) rotateX(0);
+                opacity: 1;
+            }
+        }
+
+        .fade {
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .noBtn {
+            position: absolute;
+            transition:
+                left 0.18s ease-out,
+                top 0.18s ease-out,
+                transform 0.15s ease;
+        }
+
+        .noBtn:hover {
+            transform: scale(1.05) rotate(-2deg);
+        }
+
+        .move-btn {
+            position: absolute;
+            transition:
+                left 0.18s ease-out,
+                top 0.18s ease-out,
+                transform 0.15s ease;
+        }
+
+        .move-btn:hover {
+            transform: scale(1.05) rotate(-2deg);
+        }
+    </style>
+</head>
+
+<body class="bg-main">
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        const { useState } = React;
+
+        function App() {
+
+            const [stage, setStage] = useState("intro");
+            const [storyStep, setStoryStep] = useState(0);
+            const [qIndex, setQIndex] = useState(0);
+            const [pin, setPin] = useState([]);
+            const [showYesMessage, setShowYesMessage] = useState(false);
+
+            const [noPos, setNoPos] = useState({
+                x: window.innerWidth / 2 + 80,
+                y: window.innerHeight / 2
+            });
+
+            /* STORY */
+            const story = [
+                {
+                    title: "Pipo: 3andi serr bch n9olik alih 🐶 Hao !",
+                    text: "💖",
+                    gif: "./assets/pipo1.webp",
+                },
+                {
+                    title: "Hao ! La7tha 9bal Mama ✨",
+                    text: "Mama i want to says thank you for saving me taking care of me and loving me all this years,we shared life have some hard moments but full of beautiful moments.you deserves love mama 🌸",
+                    gif: "./assets/pipo1.webp",
+                },
+                {
+                    title: "Nhebek barcha Mamati ✨ Hao !",
+                    text: "Ma7lek Mama w ya2a7an 9alb 🌸 Hao ! Hao !",
+                    gif: "./assets/pipo2.webp",
+                },
+                {
+                    title: "The Little Serr ✨ Hao !",
+                    gif: "./assets/pipo3.webp",
+                    text: "Fama chkoun 3tani amena wena bch nwassalhelek mama 🌸 kima rabitni ",
+                },
+                {
+                    title: "The hidden Jweb 💌 Hao !",
+                    text: "Mama ! el Amena hia jweb lik enti 🔐",
+                    gif: "./assets/pipo4.webp",
+                }
+            ];
+
+            /* QUESTIONS */
+            const questions = [
+                {
+                    q: "A7ssen esm Mama thebou ?",
+                    options: ["Arweta 😀", "Arwen 🤔", "Rita 🥰"],
+                    answer: "Rita 🥰",
+                    digit: "3"
+                },
+                {
+                    q: "Akther blassa thebha mama ?",
+                    options: ["Sa7ra ♨️", "lb7ar 🥰", "farchha 😴"],
+                    answer: "lb7ar 🥰",
+                    digit: "0"
+                },
+                {
+                    q: "C'est quoi le pluriel de mouton en arabe?",
+                    options: ["3laléch 😀", "3allouchin 😂", "3alouch(s) 🤔"],
+                    answer: "3allouchin 😂",
+                    digit: "11"
+                },
+                {
+                    q: "Sa7it Mamati, haya n7elou jweeb ?",
+                    options: ["Eyyy 😀", "Lee ama haya 🥴", "Hetou la na7ilik omk 😠"],
+                    answer: "Hetou la na7ilik omk 😠",
+                    digit: "1992"
+                }
+            ];
+
+            const nextStory = () => {
+                if (storyStep === story.length - 1) {
+                    setStage("puzzle");
+                } else {
+                    setStoryStep(storyStep + 1);
+                }
+            };
+
+            const answer = (opt) => {
+                const q = questions[qIndex];
+
+                if (opt === q.answer) {
+                    setPin([...pin, q.digit]);
+
+                    if (qIndex === questions.length - 1) {
+                        setStage("unlock");
+                    } else {
+                        setQIndex(qIndex + 1);
+                    }
+                }
+            };
+
+            /* MOVE NO BUTTON */
+            const moveNo = () => {
+
+                const moveRange = 220;
+
+                const newX = Math.random() * (window.innerWidth - 200);
+                const newY = Math.random() * (window.innerHeight - 100);
+
+                setNoPos({
+                    x: newX,
+                    y: newY
+                });
+            };
+            React.useEffect(() => {
+                if (showYesMessage) {
+                    const duration = 2 * 1000;
+                    const end = Date.now() + duration;
+
+                    const interval = setInterval(() => {
+                        if (Date.now() > end) {
+                            clearInterval(interval);
+                            return;
+                        }
+
+                        confetti({
+                            particleCount: 80,
+                            spread: 80,
+                            origin: { y: 0.6 }
+                        });
+
+                    }, 200);
+                }
+            }, [showYesMessage]);
+            /* INTRO */
+            if (stage === "intro") {
+                return (
+                    <div className="min-h-screen flex flex-col items-center justify-center text-center fade">
+
+                        <div className="bg-old flex justify-center flex-col items-center">
+
+                            <img src='./assets/pipo1.webp' width="200px" />
+
+                            <h1 className="text-4xl font-bold text-black mt-4">
+                                Haya taba3ni mama ? 💌
+                            </h1>
+
+                            <button
+                                onClick={() => setStage("story")}
+                                className="bg-btn mt-6 px-6 py-3 text-white rounded-2xl"
+                            >
+                                Hayaaa !
+                            </button>
+
+                        </div>
+
+                    </div>
+                );
+            }
+
+            /* STORY */
+            if (stage === "story") {
+
+                const s = story[storyStep];
+
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-6 text-center">
+
+                        <div className="bg-old p-8 rounded-3xl shadow-xl max-w-md space-y-4 fade">
+
+                            <img src={s.gif} width="150px" className="w-full text-center" />
+
+                            <h2 className="text-2xl font-bold">{s.title}</h2>
+
+                            <p>{s.text}</p>
+
+                            <button
+                                onClick={nextStory}
+                                className="bg-btn px-6 py-3 text-white rounded-2xl"
+                            >
+                                heyyy !
+                            </button>
+
+                        </div>
+
+                    </div>
+                );
+            }
+
+            /* PUZZLE */
+            if (stage === "puzzle") {
+
+                const q = questions[qIndex];
+
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-6 text-center">
+
+                        <div className="bg-old p-8 rounded-3xl shadow-xl space-y-6 w-full max-w-md">
+
+                            <h2 className="text-2xl font-bold">
+                                🔐 Puzzle {qIndex + 1}/4
+                            </h2>
+
+                            <p className="text-lg">{q.q}</p>
+
+                            <div className="grid gap-3">
+
+                                {q.options.map((opt) => (
+                                    <button
+                                        key={opt}
+                                        onClick={() => answer(opt)}
+                                        className="bg-btn px-4 py-3 text-white rounded-xl transition"
+                                    >
+                                        {opt}
+                                    </button>
+                                ))}
+
+                            </div>
+
+                            <p className="text-sm text-gray-600">
+                                PIN: {pin.join("-")}
+                            </p>
+
+                            <img
+                                src="https://png.pngtree.com/png-clipart/20240404/original/pngtree-treasure-locked-chest-box-png-image_14754412.png"
+                                width="100"
+                                className="mx-auto"
+                            />
+
+                        </div>
+
+                    </div>
+                );
+            }
+
+            /* UNLOCK */
+            if (stage === "unlock") {
+
+                return (
+                    <div className="min-h-screen flex items-center justify-center">
+
+                        <div className="letter bg-old p-10 rounded-3xl text-center flex flex-col justify-center shadow-2xl space-y-4">
+
+                            <h1 className="text-3xl">💌 Letter Unlocked</h1>
+
+                            <p>PIN: {pin.join("-")}</p>
+
+                            <img src="./assets/pipo5.webp" width="200px" className="m-auto" />
+
+                            <p>Sahit Mamty ! 💖</p>
+                            <p>PS: PIN ma yfakrekch bhaja Hao !</p>
+                            <button
+                                onClick={() => setStage("final")}
+                                className="px-6 py-3 bg-btn text-white rounded-2xl"
+                            >
+                                Haya n7elou jweb
+                            </button>
+
+                        </div>
+
+                    </div>
+                );
+            }
+
+            /* FINAL */
+            if (stage === "final") {
+
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-main relative pb-[5rem]">
+
+                        <div className="bg-letter letter p-10 rounded-3xl text-center space-y-6 relative h-[40rem]">
+
+                            <h1 className="text-3xl font-bold">💖 Im sorry !</h1>
+
+                            <div className="rounded-2xl pb-[3rem] pt-[1rem] px-[4rem] w-[35rem]">
+
+                                <p className="text-2xl font-semibold text-gray-800">
+                                    “Sometimes a little dog can notice when two hearts belong together.” 💖
+                                </p>
+
+                                <p className="mt-4 text-gray-600 text-lg text-left italic">
+                                    Asslema Dodo!
+                                    <br />
+                                    Nshallah tkoun bkhir ❤️ enti yomkn ma39altnich ena chkoun, habit n9olik twahachtek yesser ...<br />
+                                    baathtlik maa Pipo 🐾 khater mal9itch 7al kifh nousslk juste habit n9olik
+                                </p>
+
+                                <p className="mt-1 text-red-600 text-lg italic">
+                                    Samahni ...
+                                </p>
+
+                                <p className="mt-1 text-gray-600 text-lg italic">
+                                    <br />
+                                    PS : Nheb nrak 9bal manrawah
+                                </p>
+
+                                <p className="text-gray-600 text-lg text-right italic">
+                                    <br />
+                                    Adel (3chirek) ...
+                                </p>
+
+                            </div>
+
+                            <div className="mt-2 text-gray-700 bg-old rounded-2xl">
+                                <p className="mt-1 text-gray-600 text-lg">
+                                    Will you go on a date with me this Saturday? 🌸✨
+                                </p>
+                                <p>📍 Location: ****** (will pick you up)</p>
+                                <p>📅 Date: 13/May/2026 - Saturday Evening</p>
+                            </div>
+
+                            {/* YES BUTTON */}
+                            <button
+                                onClick={() => setShowYesMessage(true)}
+                                className="px-6 py-3 bg-green-500 text-white rounded-2xl"
+                            >
+                                Ayy!!
+                            </button>
+
+                            {/* NO BUTTON */}
+                            <button
+                                onMouseEnter={moveNo}
+                                style={{
+                                    left: noPos.x + "px",
+                                    top: noPos.y + "px"
+                                }}
+                                className="move-btn px-6 py-3 bg-red-500 text-white rounded-2xl"
+                            >
+                                Barra Zammer
+                            </button>
+
+                            {/* MODAL */}
+                            {
+                                showYesMessage && (
+                                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+                                        <div className="bg-old rounded-3xl p-8 text-center shadow-2xl max-w-md mx-4 animate-bounce">
+
+                                            <div className="text-6xl mb-4">
+                                                🎉🐶💖
+                                            </div>
+
+                                            <h2 className="text-3xl font-bold text-pink-600 mb-4 flex flex-col items-center justify-center">
+                                                YAYYYYYY
+                                                <img src="./assets/pipolast.webp" width="100px" />
+                                            </h2>
+                                            <p className="text-gray-700 text-lg">
+                                                Pipo : Mamati ena ferhan wlh 🐾✨
+                                            </p>
+
+                                            <p className="text-gray-700 text-lg">
+                                                Merci Dodo & bien recu ta reponse !💖
+                                            </p>
+
+                                            <p className="mt-4 text-gray-600 italic">
+                                                “Best date unlocked successfully.” 💌
+                                            </p>
+
+                                            <button
+                                                onClick={() => setShowYesMessage(false)}
+                                                className="bg-btn mt-6 px-6 py-3 bg-pink-500 text-white rounded-2xl"
+                                            >
+                                                Close
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+                                )
+                            }
+
+                        </div>
+
+                    </div>
+                );
+            }
+
+            return null;
+        }
+
+        ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+    </script>
+</body>
+
+</html>
